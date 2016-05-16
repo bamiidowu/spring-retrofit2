@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context 
+                           http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:property-placeholder location="classpath:spring/properties/application.properties"/>
+
+    <bean id="proxyFactory" class="com.boostrdev.spring.retrofit2.WebServiceProxyFactory" factory-method="create">
+        <constructor-arg name="webServiceProxyClazz" type="java.lang.Class"
+                         value="com.boostrdev.spring.retrofit2.AcronymWebServiceProxy"/>
+        <constructor-arg name="baseUrl" value="${acronym.base.url}"/>
+        <constructor-arg name="logging" value="${acronym.http.logging}"/>
+        <constructor-arg name="proxy" value="${acronym.http.proxy}"/>
+        <constructor-arg name="proxyHost" value="${acronym.proxy.host}"/>
+        <constructor-arg name="proxyPort" value="${acronym.proxy.port}"/>
+        <constructor-arg name="converterFactory" ref="gsonConverter"/>
+
+    </bean>
+    <bean id="gsonConverter" class="retrofit2.converter.gson.GsonConverterFactory" factory-method="create"/>
+</beans>
