@@ -10,7 +10,7 @@
     <context:property-placeholder location="classpath:spring/properties/application.properties"/>
 
     <bean id="proxyFactory" class="com.boostrdev.spring.retrofit2.WebServiceProxyFactory" factory-method="create">
-        <constructor-arg name="webServiceProxyClazz" type="java.lang.Class"
+        <constructor-arg name="webServiceProxyClazz"
                          value="com.boostrdev.spring.retrofit2.AcronymWebServiceProxy"/>
         <constructor-arg name="baseUrl" value="${acronym.base.url}"/>
         <constructor-arg name="logging" value="${acronym.http.logging}"/>
