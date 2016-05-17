@@ -26,26 +26,32 @@ public class AcronymWebServiceProxyTest {
 
     @Autowired
     private AcronymWebServiceProxy acronymWebServiceProxy;
+
     private Call<List<AcronymData>> call;
 
     @Before
     public void setUp() {
+        //The Call object can be used to make synchronous and asynchronous HTTP requests
         call = acronymWebServiceProxy.getAcronymResults("HMM");
     }
 
     @Test
     public void getAcronymResultsSynchronously() throws Exception {
+        // Execute the call synchronously
         Response<List<AcronymData>> response = call.execute();
         verifyResponse(response);
     }
 
     @Test
     public void getAcronymResultsAsynchronously() throws Exception {
+        // The count down latch allows the main thread to be notified once the callback has been executed
         final CountDownLatch callbackLatch = new CountDownLatch(1);
-
+        
+        // Execute the call asynchronously
         call.enqueue(new Callback<List<AcronymData>>() {
             public void onResponse(Call<List<AcronymData>> call, Response<List<AcronymData>> response) {
                 verifyResponse(response);
+                // Notify the main thread
                 callbackLatch.countDown();
             }
 
@@ -53,33 +59,38 @@ public class AcronymWebServiceProxyTest {
                 t.printStackTrace();
             }
         });
-
+        // Wait 2 minutes to be notified by the call back thread
         callbackLatch.await(2000, TimeUnit.MILLISECONDS);
     }
 
     private void verifyResponse(Response<List<AcronymData>> response) {
 
+        assertNotNull(response);
+
         // Request is successful if response code begins with 2XX
-        assertTrue(response.isSuccessful());
+        if (response.isSuccessful()) {
 
-        List<AcronymData> acronymDataList = response.body();
+            List<AcronymData> acronymDataList = response.body();
 
-        // Check the body isn't empty
-        assertNotNull(acronymDataList);
+            // Check the body isn't empty
+            assertNotNull(acronymDataList);
 
-        // The response should have only one item
-        assertEquals(acronymDataList.size(), 1);
+            // The response should have only one item
+            assertEquals(acronymDataList.size(), 1);
 
-        for (AcronymData acronymData : acronymDataList) {
-            LOG.debug("Acronym short form: " + acronymData.toString());
-            List<AcronymData.AcronymExpansion> acronymExpansionList = acronymData.getLfs();
+            for (AcronymData acronymData : acronymDataList) {
+                LOG.debug("Acronym short form: " + acronymData.toString());
+                List<AcronymData.AcronymExpansion> acronymExpansionList = acronymData.getLfs();
 
-            // The acronym data should have 8 acronym expansions
-            assertEquals(acronymExpansionList.size(), 8);
+                // The acronym data should have 8 acronym expansions
+                assertEquals(acronymExpansionList.size(), 8);
 
-            for (AcronymData.AcronymExpansion acronymExpansion : acronymExpansionList) {
-                LOG.debug("Acronym long form: " + acronymExpansion.toString());
+                for (AcronymData.AcronymExpansion acronymExpansion : acronymExpansionList) {
+                    LOG.debug("Acronym long form: " + acronymExpansion.toString());
+                }
             }
+        } else {
+            fail();
         }
     }
 
