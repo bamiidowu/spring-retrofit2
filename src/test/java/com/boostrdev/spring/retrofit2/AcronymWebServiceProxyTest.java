@@ -41,12 +41,12 @@ public class AcronymWebServiceProxyTest {
 
     @Test
     public void getAcronymResultsAsynchronously() throws Exception {
-        final CountDownLatch lock = new CountDownLatch(1);
+        final CountDownLatch callbackLatch = new CountDownLatch(1);
 
         call.enqueue(new Callback<List<AcronymData>>() {
             public void onResponse(Call<List<AcronymData>> call, Response<List<AcronymData>> response) {
                 verifyResponse(response);
-                lock.countDown();
+                callbackLatch.countDown();
             }
 
             public void onFailure(Call<List<AcronymData>> call, Throwable t) {
@@ -54,10 +54,10 @@ public class AcronymWebServiceProxyTest {
             }
         });
 
-        lock.await(2000, TimeUnit.MILLISECONDS);
+        callbackLatch.await(2000, TimeUnit.MILLISECONDS);
     }
 
-    public void verifyResponse(Response<List<AcronymData>> response) {
+    private void verifyResponse(Response<List<AcronymData>> response) {
 
         // Request is successful if response code begins with 2XX
         assertTrue(response.isSuccessful());
